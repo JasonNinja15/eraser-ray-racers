@@ -53,6 +53,7 @@ input[type=text]{background:#160f38;border:2px solid var(--ink);border-radius:10
 .threats canvas{width:76px;height:52px}
 .threats b{font-family:var(--d);font-weight:400;font-size:1.02rem;letter-spacing:.04em;color:var(--star)}
 .threats span{display:block;font-size:.82rem;color:var(--dim)}
+.threats li.none{display:block;padding:10px 12px}
 .best{font-weight:800;color:var(--gold)}
 /* HUD */
 #hud{position:fixed;inset:0;pointer-events:none;z-index:5}
@@ -152,14 +153,18 @@ input[type=text]{background:#160f38;border:2px solid var(--ink);border-radius:10
           <span><kbd>M</kbd></span><span>Sound on or off</span>
         </div>
         <h3>What's out there</h3>
-        <ul class="threats">
-          <li><canvas id="ic-deb" width="152" height="104"></canvas><div><b>Space debris</b><span>Rocks, scrap and dead satellites fall from above. Rub them out or dodge.</span></div></li>
-          <li><canvas id="ic-raid" width="152" height="104"></canvas><div><b>Raider ships</b><span>They park overhead and shoot until erased. With more pilots, they get tougher.</span></div></li>
-          <li><canvas id="ic-monkey" width="152" height="104"></canvas><div><b>Rainbow farting monkeys</b><span>They zoom across the screen. Do not touch the monkeys.</span></div></li>
-          <li><canvas id="ic-mini" width="152" height="104"></canvas><div><b>Mini ships</b><span>After 1,000 m. Tiny, fast raiders that swarm in groups of two or three.</span></div></li>
-          <li><canvas id="ic-cat" width="152" height="104"></canvas><div><b>Space cat</b><span>After 1,300 m. Its Multi Cannon shoots at every pilot and every raider on screen at once.</span></div></li>
-          <li><canvas id="ic-mother" width="152" height="104"></canvas><div><b>Raider Mothership</b><span>After 2,000 m. A boss that parks up top, sweeps its own ray cannon across you and launches mini ships.</span></div></li>
-          <li><canvas id="ic-kit" width="152" height="104"></canvas><div><b>Pickups</b><span>Repair kits fix your hull. Raiders sometimes drop a Double Cannon or Mega Ray (400 m each). A Mothership can drop Ray Pierce, which lets your ray go through one more thing for the rest of the race.</span></div></li>
+        <ul class="threats" id="threats">
+          <li id="seen-none" class="none"><div><b>Nothing spotted yet</b><span>Fly out and see what's there. Everything you run into shows up here.</span></div></li>
+          <li data-seen="deb" hidden><canvas id="ic-deb" width="152" height="104"></canvas><div><b>Space debris</b><span>Rocks, scrap and dead satellites fall from above, faster the farther you go. Rub them out or dodge.</span></div></li>
+          <li data-seen="raid" hidden><canvas id="ic-raid" width="152" height="104"></canvas><div><b>Raider ships</b><span>They park overhead and shoot until erased. With more pilots, they get tougher.</span></div></li>
+          <li data-seen="monkey" hidden><canvas id="ic-monkey" width="152" height="104"></canvas><div><b>Rainbow farting monkeys</b><span>They zoom across the screen. Touching one takes half your hull.</span></div></li>
+          <li data-seen="mini" hidden><canvas id="ic-mini" width="152" height="104"></canvas><div><b>Mini ships</b><span>Tiny, fast raiders that swarm in groups of two or three. While a Mothership is up, they sometimes drop repair kits.</span></div></li>
+          <li data-seen="cat" hidden><canvas id="ic-cat" width="152" height="104"></canvas><div><b>Space cat</b><span>Its Multi Cannon fires a fast blue laser at every pilot and every raider on screen. The lasers go through everything.</span></div></li>
+          <li data-seen="mother" hidden><canvas id="ic-mother" width="152" height="104"></canvas><div><b>Raider Mothership</b><span>A boss that parks up top and launches mini ships. Its ray aim freezes just before it fires, so move out of the line.</span></div></li>
+          <li data-seen="kit" hidden><canvas id="ic-kit" width="152" height="104"></canvas><div><b>Repair kit</b><span>Fixes 25 hull.</span></div></li>
+          <li data-seen="dbl" hidden><canvas id="ic-dbl" width="152" height="104"></canvas><div><b>Double Cannon</b><span>A second Eraser Ray cannon for the next 400 m.</span></div></li>
+          <li data-seen="mega" hidden><canvas id="ic-mega" width="152" height="104"></canvas><div><b>Mega Ray</b><span>A wider beam that does double damage, for the next 400 m.</span></div></li>
+          <li data-seen="pierce" hidden><canvas id="ic-pierce" width="152" height="104"></canvas><div><b>Ray Pierce</b><span>Dropped by Motherships. Your ray goes through one more thing for the rest of the race.</span></div></li>
         </ul>
       </div>
     </div>
@@ -468,7 +473,8 @@ const sfx={
   up(){[660,880,1100,1320].forEach((f,i)=>tone('triangle',f,f*1.02,.14,.12,i*.07))},
   charge(){tone('sine',160,1100,MRAY.charge,.12);noise(MRAY.charge,.06,400,3000,'bandpass')},
   mray(){tone('sawtooth',92,64,MRAY.fire,.16);tone('square',46,40,MRAY.fire,.1);noise(MRAY.fire,.12,900,300)},
-  multi(){for(let i=0;i<3;i++)tone('triangle',1200,500,.06,.05,i*.05)}
+  zap(){tone('square',2400,420,.12,.06);tone('sine',1600,300,.14,.08)},
+  lock(){tone('square',1500,1500,.07,.08);tone('square',1500,1500,.07,.08,.11)}
 };
 function beamSound(own,remote,rub){if(!beamNodes)return;const t=AC.currentTime,v=own?.55:remote?.18:0;beamNodes.g.gain.setTargetAtTime(v,t,.04);beamNodes.ng.gain.setTargetAtTime(rub&&own?.5:rub&&remote?.25:0,t,.05);
   beamNodes.o1.frequency.setTargetAtTime(rub?150:175,t,.05)}
@@ -544,7 +550,7 @@ function hostSpawn(dt){const d=world.dist/1000,mo=hasMother();
   if(!mo&&world.dist>=SP.mo)spawnMother(d);
   SP.mk-=dt;if(SP.mk<=0){SP.mk=rand(14,26)/Math.min(1.6,1+d*.05);if(!mo){spawnMonkey();if(d>3&&Math.random()<.35)spawnMonkey(220)}}
   if(world.dist>1300){SP.cat-=dt;if(SP.cat<=0){SP.cat=rand(28,45);if(!mo&&!ents.some(e=>e.k==='cat'))spawnCat()}}}
-function fireBullet(x,y,a,spd,dmg,cat){const b={x,y,vx:Math.cos(a)*spd,vy:Math.sin(a)*spd,dmg,t:0,cat:cat?1:0};bullets.push(b);if(NET.active)NET.out.B.push(mkSeq([Math.round(x),Math.round(y),Math.round(b.vx),Math.round(b.vy),dmg,b.cat]));sfx.shot(.8)}
+function fireBullet(x,y,a,spd,dmg,cat){const b={x,y,vx:Math.cos(a)*spd,vy:Math.sin(a)*spd,dmg,t:0,cat:cat?1:0};bullets.push(b);if(NET.active)NET.out.B.push(mkSeq([Math.round(x),Math.round(y),Math.round(b.vx),Math.round(b.vy),dmg,b.cat]));if(!cat)sfx.shot(.8)}
 function nearest(e,pls){let tg=null,bd=1e9;for(const p of pls){const l=Math.hypot(p.x-e.x,p.y-e.y);if(l<bd){bd=l;tg=p}}return tg}
 function turnTo(e,ta,rate,dt){let da=((ta-e.aim+Math.PI*3)%TAU)-Math.PI;e.aim+=clamp(da,-rate*dt,rate*dt)}
 function simEnemy(e,dt,pls,d){const Kd=KIND[e.k],small=Kd.small;
@@ -561,22 +567,28 @@ function simEnemy(e,dt,pls,d){const Kd=KIND[e.k],small=Kd.small;
     else{shoot(1,-.2);shoot(1,0);shoot(1,.2);shoot(0);shoot(2);e.fT=rand(1.4,1.9)/rate}}}
 // The Mothership parks near the top and never moves. It sweeps its own ray cannon across the pilots
 // (idle, then a charge-up warning line, then the beam) and launches mini ships from its hangar bays.
-const MRAY={charge:1.15,fire:2.3,dps:45,len:1500};
+// lock: for the last part of the charge the aim freezes, so pilots get a moment to dodge out of the line
+const MRAY={charge:1.3,lock:.55,fire:2.3,dps:45,len:1500};
+const rayLocked=e=>e.rp===1&&T-(e.c1||T)>MRAY.charge-MRAY.lock;
 function motherRay(e){const a=e.aim,ox=e.x+Math.cos(a)*44,oy=e.y+56+Math.sin(a)*44;return{ox,oy,x:ox+Math.cos(a)*MRAY.len,y:oy+Math.sin(a)*MRAY.len}}
 function simMother(e,dt,pls,d){
   e.vx=0;const hy=e.hy+Math.sin(T*.8)*5;e.vy=clamp((hy-e.y)*1.6,-90,110);
   const tg=nearest(e,pls),rate=1+Math.min(d,10)*.05;
-  if(tg){const ta=clamp(Math.atan2(tg.y-(e.y+56),tg.x-e.x),.2,Math.PI-.2);turnTo(e,ta,e.rp===2?.45:e.rp===1?.9:1.4,dt)}
+  // it can aim in any direction, including up past its own hull
+  const locked=e.rp===1&&e.rT<MRAY.lock;
+  if(tg&&!locked)turnTo(e,Math.atan2(tg.y-(e.y+56),tg.x-e.x),e.rp===2?.45:e.rp===1?.9:1.4,dt);
   e.rT-=dt;
   if(e.rp===0){if(e.rT<=0&&tg&&e.y>70){e.rp=1;e.rT=MRAY.charge}}
   else if(e.rp===1){if(e.rT<=0){e.rp=2;e.rT=MRAY.fire}}
   else if(e.rT<=0){e.rp=0;e.rT=rand(2.2,3.4)/rate}
   e.mT-=dt;if(e.mT<=0&&e.y>70){e.mT=rand(5,7)/rate;const n=ents.filter(o=>o.k==='mini').length;
     if(n<8){const k=d>4?3:2;for(let i=0;i<k;i++){const s=i%2?1:-1;spawnMini(e.x+s*74,e.y+36,d,rand(260,430)).vx=s*rand(80,160)}}}}
-// the cat drifts across, bobbing, and fires one shot at every pilot and every raider on screen per volley
+// the cat drifts across, bobbing, and fires one blue laser at every pilot and every raider on screen per volley.
+// The lasers are fast and pierce: each one keeps going through everything it hits.
+const CAT_LASER=950;
 function simCat(e,dt,pls){e.ph+=dt*1.8;const ny=e.by+Math.sin(e.ph)*20;e.vy=(ny-e.y)/Math.max(dt,1e-3);e.y=ny;
   e.fT-=dt;if(e.fT<=0&&e.x>20&&e.x<W-20){e.fT=1.5;const ox=e.x,oy=e.y+24,tg=[...pls];for(const o of ents)if(KIND[o.k].en&&!o.dead&&o.x>0&&o.x<W&&o.y>0&&o.y<H)tg.push(o);
-    for(const t of tg)fireBullet(ox,oy,Math.atan2(t.y-oy,t.x-ox),300,10,true);sfx.multi()}}
+    for(const t of tg)fireBullet(ox,oy,Math.atan2(t.y-oy,t.x-ox),CAT_LASER,10,true);sfx.zap()}}
 function hostSim(dt){const pls=livePlayers(),d=world.dist/1000;
   for(const e of ents){const Kd=KIND[e.k];
     if(Kd.boss)simMother(e,dt,pls,d);
@@ -590,7 +602,7 @@ function hurtEnt(e,dmg,by){if(e.dead||KIND[e.k].pick)return;e.hp-=dmg;if(e.hp<=0
 // Upgrade odds from regular raiders: 2% at the start, +2% every 500 m, capped at 10%.
 const upChance=()=>Math.min(.10,.02+.02*Math.floor(world.dist/500));
 function rollDrop(e){const K=KIND[e.k],r=Math.random(),up=()=>Math.random()<.5?'dbl':'mega';
-  if(K.small)return null;
+  if(K.small)return hasMother()&&r<.25?'kit':null; // minis only drop repair kits, and only while a Mothership is up
   if(K.boss)return r<.3?'pierce':r<.6?up():'kit';
   if(K.en){if(r<upChance())return up();return Math.random()<(e.k==='dread'?1:.35)?'kit':null}
   if(K.cat)return r<.5?'kit':null;
@@ -661,8 +673,9 @@ function drawBeam(b){const {ox,oy,x,y}=b,w=Math.sin(T*50)*1.5,m=b.mega?1.9:1;ctx
     ctx.beginPath();ctx.arc(h.x,h.y,6*m,0,TAU);ctx.fillStyle='#fff';ctx.fill()}}
 // the Mothership's ray: a flickering aim line while it charges, then a thick red beam
 function drawMotherRay(e){const r=motherRay(e);ctx.lineCap='round';
-  if(e.rp===1){const k=1-clamp(e.rT/MRAY.charge,0,1);ctx.setLineDash([16,12]);ctx.lineDashOffset=-T*300;ctx.beginPath();ctx.moveTo(r.ox,r.oy);ctx.lineTo(r.x,r.y);
-    ctx.strokeStyle=`rgba(255,70,70,${.35+.45*k*((T*16|0)%2)})`;ctx.lineWidth=3+k*3;ctx.stroke();ctx.setLineDash([]);
+  if(e.rp===1){const k=clamp((T-(e.c1||T))/MRAY.charge,0,1),lock=rayLocked(e);ctx.beginPath();ctx.moveTo(r.ox,r.oy);ctx.lineTo(r.x,r.y);
+    if(lock){ctx.strokeStyle=INK;ctx.lineWidth=9;ctx.stroke();ctx.strokeStyle=(T*20|0)%2?'#ffffff':'#ff3b3b';ctx.lineWidth=5;ctx.stroke()}
+    else{ctx.setLineDash([16,12]);ctx.lineDashOffset=-T*300;ctx.strokeStyle=`rgba(255,70,70,${.35+.45*k*((T*16|0)%2)})`;ctx.lineWidth=3+k*3;ctx.stroke();ctx.setLineDash([])}
     ctx.beginPath();ctx.arc(r.ox,r.oy,6+k*14,0,TAU);ctx.fillStyle='#ff5b5b';ctx.fill();ctx.lineWidth=3;ctx.strokeStyle=INK;ctx.stroke()}
   else if(e.rp===2){const w=Math.sin(T*45)*2;ctx.beginPath();ctx.moveTo(r.ox,r.oy);ctx.lineTo(r.x,r.y);
     ctx.globalAlpha=.3;ctx.strokeStyle='#ff3b3b';ctx.lineWidth=60+w*2;ctx.stroke();ctx.globalAlpha=1;
@@ -698,7 +711,7 @@ function updShip(dt){const p=me;if(!p)return;p.inv-=dt;
   if(want){p.heat+=HEAT_UP*dt;if(p.heat>=1){p.heat=1;p.over=true;p.beam=false;toast('Eraser ray overheated!','#ff9f4a')}}
   else{p.heat=Math.max(0,p.heat-HEAT_DOWN*dt*(p.over?.85:1));if(p.over&&p.heat<=.25)p.over=false}
   // bullets
-  for(const b of bullets){if(b.hitMe)continue;const dx=(b.x-p.x)/48,dy=(b.y-p.y)/26;if(dx*dx+dy*dy<1){b.hitMe=true;b.gone=true;hurtMe(b.dmg);crumbs(b.x,b.y,4,4)}}
+  for(const b of bullets){if(b.hitMe)continue;const dx=(b.x-p.x)/48,dy=(b.y-p.y)/26;if(dx*dx+dy*dy<1){b.hitMe=true;if(!b.cat)b.gone=true;hurtMe(b.dmg);crumbs(b.x,b.y,4,4)}}
   // the Mothership ray
   for(const e of ents)if(e.k==='mother'&&e.rp===2&&!e.dead){const r=motherRay(e);if(segDist(p.x,p.y,r.ox,r.oy,r.x,r.y)<36)hurtMe(MRAY.dps*dt,true)}
   // bumping into things
@@ -724,10 +737,12 @@ function step(dt){T+=dt;
   for(const e of ents)if(KIND[e.k].mk)monkeyTrail(e,dt);
   for(const b of bullets){b.x+=b.vx*dt;b.y+=b.vy*dt;b.t+=dt;if(b.x<-30||b.x>W+30||b.y<-30||b.y>H+30)b.gone=true;
     // the cat's shots hurt raiders too (the host applies the damage; everyone else just sees the shot land)
-    if(b.cat&&!b.gone)for(const e of ents){if(!KIND[e.k].en||e.dead)continue;const[hx,hy]=hb(e),dx=(b.x-e.x)/(hx+6),dy=(b.y-e.y)/(hy+6);
-      if(dx*dx+dy*dy<1){b.gone=true;crumbs(b.x,b.y,3,4);if(auth())hurtEnt(e,b.dmg*1.5,'cat');break}}}
+    if(b.cat&&!b.gone)for(const e of ents){if(!KIND[e.k].en||e.dead||(b.hit&&b.hit.has(e.id)))continue;const[hx,hy]=hb(e),dx=(b.x-e.x)/(hx+6),dy=(b.y-e.y)/(hy+6);
+      if(dx*dx+dy*dy<1){(b.hit||(b.hit=new Set())).add(e.id);crumbs(b.x,b.y,3,4);if(auth())hurtEnt(e,b.dmg*1.5,'cat')}}}
   bullets=bullets.filter(b=>!b.gone);
-  for(const e of ents){if(e.k==='mother'&&e.rp!==e.lrp){if(e.rp===1)sfx.charge();else if(e.rp===2){sfx.mray();shake=Math.max(shake,6)}e.lrp=e.rp}}
+  for(const e of ents){if(state==='play'&&e.y>-20&&e.x>-30&&e.x<W+30)markSeen(e.k);
+    if(e.k==='mother'&&rayLocked(e)&&!e.lockSfx){e.lockSfx=1;sfx.lock()}
+    if(e.k==='mother'&&e.rp!==e.lrp){if(e.rp===1){e.c1=T;e.lockSfx=0;sfx.charge()}else if(e.rp===2){sfx.mray();shake=Math.max(shake,6)}e.lrp=e.rp}}
   if(state==='play')updShip(dt);
   updBeams(dt);updFx(dt);
   shake=Math.max(0,shake-dt*40);hurtFlash=Math.max(0,hurtFlash-dt*2.5);
@@ -774,7 +789,10 @@ function drawWorld(){
       rrect(ctx,e.x-w/2+2,y+2,(w-4)*clamp(e.hp/e.mhp,0,1),4,2);ctx.fillStyle='#ff5b5b';ctx.fill()}}
   for(const e of ents)if(e.k==='cat'){drawEnt(e);drawMulti(e)}
   drawFx(0);
-  for(const b of bullets){const c=b.cat;ctx.beginPath();ctx.arc(b.x,b.y,12,0,TAU);ctx.fillStyle=c?'rgba(95,211,255,.3)':'rgba(255,90,60,.28)';ctx.fill();ctx.beginPath();ctx.arc(b.x,b.y,6.5,0,TAU);ctx.fillStyle=c?'#5fd3ff':'#ff7a3d';ctx.fill();ctx.lineWidth=2.5;ctx.strokeStyle=INK;ctx.stroke();
+  ctx.lineCap='round';
+  for(const b of bullets){if(!b.cat)continue;const sp=Math.hypot(b.vx,b.vy)||1,L=46,tx=b.x-b.vx/sp*L,ty=b.y-b.vy/sp*L;ctx.beginPath();ctx.moveTo(tx,ty);ctx.lineTo(b.x,b.y);
+    ctx.globalAlpha=.3;ctx.strokeStyle='#3fa9ff';ctx.lineWidth=20;ctx.stroke();ctx.globalAlpha=1;ctx.strokeStyle=INK;ctx.lineWidth=10;ctx.stroke();ctx.strokeStyle='#3fa9ff';ctx.lineWidth=6.5;ctx.stroke();ctx.strokeStyle='#e6fbff';ctx.lineWidth=2.5;ctx.stroke()}
+  for(const b of bullets){const c=b.cat;if(c)continue;ctx.beginPath();ctx.arc(b.x,b.y,12,0,TAU);ctx.fillStyle=c?'rgba(95,211,255,.3)':'rgba(255,90,60,.28)';ctx.fill();ctx.beginPath();ctx.arc(b.x,b.y,6.5,0,TAU);ctx.fillStyle=c?'#5fd3ff':'#ff7a3d';ctx.fill();ctx.lineWidth=2.5;ctx.strokeStyle=INK;ctx.stroke();
     ctx.beginPath();ctx.arc(b.x-1.5,b.y-1.5,2.6,0,TAU);ctx.fillStyle=c?'#e6fbff':'#fff3b0';ctx.fill()}
   for(const b of beamsNow)drawBeam(b);
   if(NET.active)for(const r of NET.remotes.values())if(r.init&&r.alive&&r.run===world.run){drawShip(ctx,r.x,r.y,T,r.aim,{beam:r.beam,thr:clamp(-r.vy/410,0,1),dbl:r.dbl,mega:r.mega});
@@ -825,8 +843,13 @@ function togglePause(){if(state!=='play')return;const open=$('pause').hidden;$('
   if(!NET.active){paused=open;if(open)beamSound(false,false,false)}
   $('pause-h').textContent=NET.active?'Menu':'Paused';$('pause-note').textContent=NET.active?'The race keeps going while this menu is open.':'Space waits for you.';$('quit').textContent=NET.active?'Leave room':'Quit to title';if(open)$('resume').focus()}
 function toTitle(){state='title';paused=false;me=null;ents=[];bullets=[];fx=[];world={st:0,run:0,dist:0,spd:SPD0,np:1};beamSound(false,false,false);
-  for(const id of['mp','pause','over','hud','touch','hint'])$(id).hidden=true;$('title').hidden=false;updBest()}
+  for(const id of['mp','pause','over','hud','touch','hint'])$(id).hidden=true;$('title').hidden=false;updBest();updSeen()}
 function updBest(){$('best-line').innerHTML=best>0?`Your best: <span class="best">${fmtM(best)}</span>`:'No best distance yet.'}
+// The title list only shows what you have run into, remembered in this browser.
+const SEEN_OF={rock:'deb',scrap:'deb',sat:'deb',dart:'raid',gun:'raid',dread:'raid',monkey:'monkey',mini:'mini',cat:'cat',mother:'mother',kit:'kit',dbl:'dbl',mega:'mega',pierce:'pierce'};
+let seen=new Set();try{seen=new Set(JSON.parse(localStorage.getItem('err-seen')||'[]'))}catch(e){}
+function markSeen(k){const s=SEEN_OF[k];if(!s||seen.has(s))return;seen.add(s);try{localStorage.setItem('err-seen',JSON.stringify([...seen]))}catch(e){}}
+function updSeen(){let any=false;for(const li of document.querySelectorAll('#threats li[data-seen]')){const on=seen.has(li.dataset.seen);li.hidden=!on;if(on)any=true}$('seen-none').hidden=any}
 $('play-solo').onclick=()=>{initAudio();startSolo()};
 $('play-mp').onclick=()=>{initAudio();openMP()};
 $('menu-btn').onclick=()=>togglePause();
@@ -850,7 +873,7 @@ icon('ic-deb',g=>{g.save();g.translate(-34,4);g.scale(1.25,1.25);DRAW.rock(g,{r:
 icon('ic-raid',g=>{g.translate(0,-4);g.scale(1.55,1.55);DRAW.dart(g);drawTurret(g,0,18,Math.PI/2,7)});
 icon('ic-monkey',g=>{g.scale(1.45,1.45);g.translate(10,4);const tr=[];for(let i=0;i<24;i++)tr.push([-28-i*2.4,4+Math.sin(i*.4)*3]);g.lineCap='round';g.beginPath();tr.forEach((p,i)=>i?g.lineTo(p[0],p[1]):g.moveTo(p[0],p[1]));g.strokeStyle=INK;g.lineWidth=34;g.stroke();
   RAINBOW.forEach((c,i)=>{g.beginPath();tr.forEach((p,j)=>j?g.lineTo(p[0],p[1]+(i-2.5)*5):g.moveTo(p[0],p[1]+(i-2.5)*5));g.strokeStyle=c;g.lineWidth=6;g.stroke()});DRAW.monkey(g)});
-icon('ic-kit',g=>{for(const[k,x]of[['kit',-50],['dbl',-17],['mega',17],['pierce',50]]){g.save();g.translate(x,0);g.scale(.95,.95);DRAW[k](g);g.restore()}});
+for(const k of['kit','dbl','mega','pierce'])icon('ic-'+k,g=>{g.beginPath();g.arc(0,0,34,0,TAU);g.fillStyle=`rgba(${KIND[k].glow},.22)`;g.fill();g.scale(1.6,1.6);DRAW[k](g)});
 icon('ic-mini',g=>{for(const[x,y]of[[-28,-8],[0,8],[28,-8]]){g.save();g.translate(x,y);g.scale(1.3,1.3);DRAW.mini(g);drawTurret(g,0,8,Math.PI/2,5);g.restore()}});
 icon('ic-cat',g=>{g.translate(0,-6);g.scale(1.25,1.25);DRAW.cat(g);drawMulti({x:0,y:0},g)});
 icon('ic-mother',g=>{g.translate(0,8);g.scale(.52,.52);DRAW.mother(g);drawTurret(g,0,56,Math.PI/2,17)});
@@ -886,7 +909,7 @@ function applyWorld(w){if(!NET.ready)return;
   for(const[id,e]of NET.mirrors)if(!ids.has(id)&&!e.dead&&++e.miss>4){e.dead=true;NET.mirrors.delete(id)}
   for(const g of fresh('host','G',w.G)){const e=NET.mirrors.get(g[1]);if(e){if(!e.dead){e.x=+g[3]||e.x;e.y=+g[4]||e.y;killFx(e);e.dead=true}NET.mirrors.delete(g[1])}
     if(g[5]&&g[5]===NET.me&&KIND[KL[g[2]]]&&KIND[KL[g[2]]].en&&me)me.erased++}
-  for(const b of fresh('host','B',w.B)){bullets.push({x:+b[1],y:+b[2],vx:+b[3],vy:+b[4],dmg:clamp(b[5]|0,0,40),t:0,cat:b[6]?1:0});sfx.shot(.6)}
+  for(const b of fresh('host','B',w.B)){bullets.push({x:+b[1],y:+b[2],vx:+b[3],vy:+b[4],dmg:clamp(b[5]|0,0,40),t:0,cat:b[6]?1:0});if(b[6])sfx.zap();else sfx.shot(.6)}
   ents=ents.filter(e=>!e.dead);
   if(world.st===2&&state==='play'&&w.R){showOverMP(w.R)}}
 function mirrorSim(dt){for(const e of ents){if(!e.mirror)continue;e.tx+=e.vx*dt;e.ty+=e.vy*dt;const k=Math.min(1,dt*10);e.x+=(e.tx-e.x)*k;e.y+=(e.ty-e.y)*k;e.trot+=e.vr*dt;e.rot+=(e.trot-e.rot)*k;
@@ -996,7 +1019,7 @@ $('install-btn').onclick=async()=>{if(!deferredInstall)return;deferredInstall.pr
 if(onWeb&&'serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
 
 // ===================================================================== loop
-addEventListener('resize',resize);resize();spawnPlanet(false);updBest();
+addEventListener('resize',resize);resize();spawnPlanet(false);updBest();updSeen();
 let last=performance.now();
 function frame(now){const dt=Math.min(.05,(now-last)/1000);last=now;step(dt);render();if(!$('title').hidden)drawPreview();requestAnimationFrame(frame)}
 requestAnimationFrame(frame);
