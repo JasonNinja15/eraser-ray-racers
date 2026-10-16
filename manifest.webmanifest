@@ -1,0 +1,17 @@
+{
+  "name": "Eraser Ray Racers",
+  "short_name": "Eraser Ray",
+  "description": "Fly a little green saucer up through space and rub out space junk, raider ships and the odd rainbow farting monkey with your Eraser Ray. Alone or with up to five friends.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0b0820",
+  "theme_color": "#0b0820",
+  "categories": ["games"],
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
