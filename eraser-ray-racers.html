@@ -1,4 +1,4 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <title>Eraser Ray Racers</title>
 <link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0b0820"><link rel="icon" type="image/png" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -14,7 +14,7 @@
   --d:'Luckiest Guy','Arial Black',Impact,sans-serif;--b:'Nunito','Segoe UI',system-ui,sans-serif;
   color-scheme:dark;
 }
-html,body{height:100%;margin:0;background:var(--void);color:var(--star);overflow:hidden;font-family:var(--b);font-size:16px}
+html,body{height:100%;margin:0;touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;background:var(--void);color:var(--star);overflow:hidden;font-family:var(--b);font-size:16px}
 canvas#c{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:crosshair}
 button{font:inherit;color:inherit}
 [hidden]{display:none!important}
@@ -67,14 +67,14 @@ input[type=text]{background:#160f38;border:2px solid var(--ink);border-radius:10
 .bar.heat b{background:linear-gradient(#ffc4de,#ff6fae)}
 .bar.heat.hot b{background:linear-gradient(#ffb27a,#ff4b3a);animation:blink .3s steps(2) infinite}
 @keyframes blink{50%{opacity:.4}}
-#board{position:absolute;right:14px;top:12px;margin:0;padding:8px 10px;list-style:none;background:rgba(10,6,28,.7);border:2.5px solid var(--ink);border-radius:12px;min-width:170px;font-size:.88rem;font-weight:800}
+#board{position:absolute;right:14px;top:66px;margin:0;padding:8px 10px;list-style:none;background:rgba(10,6,28,.7);border:2.5px solid var(--ink);border-radius:12px;min-width:170px;font-size:.88rem;font-weight:800}
 #board li{display:grid;grid-template-columns:12px 1fr auto;gap:8px;align-items:center;padding:1px 0}
 #board li i{width:10px;height:10px;border-radius:50%;border:2px solid var(--ink)}
 #board li.out{opacity:.5;text-decoration:line-through}
 #board li b{font-variant-numeric:tabular-nums}
 #room-tag{position:absolute;left:14px;bottom:12px;font-size:.8rem;font-weight:800;color:var(--mist);text-shadow:0 1px 0 var(--ink)}
 #spectate{position:absolute;bottom:70px;left:50%;transform:translateX(-50%);background:rgba(10,6,28,.8);border:2.5px solid var(--ink);border-radius:12px;padding:8px 16px;font-weight:800;text-align:center;max-width:90vw}
-#menu-btn{position:absolute;right:14px;bottom:12px;pointer-events:auto;width:44px;height:44px;padding:0;font-size:1rem}
+#menu-btn{position:absolute;right:14px;top:12px;pointer-events:auto;width:44px;height:44px;padding:0;font-size:1rem}
 #boss{position:absolute;top:70px;left:50%;transform:translateX(-50%);width:min(440px,60vw);text-align:center}
 #boss span{display:block;font-family:var(--d);font-size:1rem;letter-spacing:.08em;color:var(--danger);-webkit-text-stroke:1px var(--ink);text-shadow:0 2px 0 var(--ink);margin-bottom:3px}
 #boss i{display:block;height:16px;border:3px solid var(--ink);border-radius:10px;background:rgba(10,6,28,.8);overflow:hidden}
@@ -82,9 +82,9 @@ input[type=text]{background:#160f38;border:2px solid var(--ink);border-radius:10
 #ups{display:flex;flex-direction:column;gap:4px;margin-top:2px}
 #ups div{align-self:flex-start;font-size:.78rem;font-weight:900;background:rgba(10,6,28,.8);border:2px solid var(--ink);border-radius:8px;padding:2px 8px;text-shadow:0 1px 0 var(--ink)}
 #hint{position:fixed;bottom:64px;left:50%;transform:translateX(-50%);z-index:6;background:rgba(10,6,28,.82);border:2.5px solid var(--ink);border-radius:12px;padding:8px 16px;font-weight:700;color:var(--mist);text-align:center;max-width:92vw;pointer-events:none;transition:opacity .6s}
-#toasts{position:fixed;top:90px;right:14px;z-index:20;display:flex;flex-direction:column;gap:6px;align-items:flex-end;pointer-events:none}
+#toasts{position:fixed;top:108px;left:50%;transform:translateX(-50%);z-index:20;display:flex;flex-direction:column;gap:6px;align-items:center;pointer-events:none;width:max-content;max-width:92vw}
 .toast{background:rgba(10,6,28,.88);border:2.5px solid var(--ink);border-radius:10px;padding:6px 12px;font-weight:800;font-size:.9rem;animation:tin .25s ease-out}
-@keyframes tin{from{transform:translateX(20px);opacity:0}}
+@keyframes tin{from{transform:translateY(-8px);opacity:0}}
 /* multiplayer */
 .code{font-family:var(--d);font-size:2.6rem;letter-spacing:.14em;color:var(--pink);-webkit-text-stroke:1px var(--ink);text-shadow:0 3px 0 var(--ink)}
 .plist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
@@ -101,9 +101,18 @@ input[type=text]{background:#160f38;border:2px solid var(--ink);border-radius:10
 .err{color:var(--danger);font-weight:700;min-height:1.4em}
 /* touch */
 #touch{position:fixed;inset:0;pointer-events:none;z-index:4}
-#stick{position:absolute;width:120px;height:120px;border-radius:50%;border:3px solid rgba(170,166,214,.4);background:rgba(10,6,28,.25);transform:translate(-50%,-50%)}
-#stick b{position:absolute;left:50%;top:50%;width:48px;height:48px;margin:-24px 0 0 -24px;border-radius:50%;background:rgba(125,255,106,.55);border:3px solid var(--ink)}
-#touch-tip{position:absolute;right:16px;bottom:70px;font-size:.8rem;font-weight:800;color:var(--mist);text-shadow:0 1px 0 var(--ink)}
+.stick{position:absolute;width:132px;height:132px;border-radius:50%;border:3px solid rgba(170,166,214,.45);background:rgba(10,6,28,.3);transform:translate(-50%,-50%);transition:opacity .2s}
+.stick.idle{opacity:.45}
+.stick b{position:absolute;left:50%;top:50%;width:54px;height:54px;margin:-27px 0 0 -27px;border-radius:50%;border:3px solid var(--ink)}
+#stick b{background:rgba(125,255,106,.6)}
+#stick2 b{background:rgba(255,143,192,.65)}
+.stick small{position:absolute;left:0;right:0;top:100%;margin-top:6px;text-align:center;font-size:.72rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:var(--mist);text-shadow:0 1px 0 var(--ink)}
+.stick:not(.idle) small{visibility:hidden}
+#rotate{z-index:30;background:rgba(5,3,16,.94);flex-direction:column;gap:18px;text-align:center}
+#rotate .ph{width:54px;height:92px;border:4px solid var(--green);border-radius:12px;animation:rot 1.6s ease-in-out infinite}
+@keyframes rot{0%,20%{transform:rotate(0)}60%,100%{transform:rotate(90deg)}}
+/* landscape phones: short screens get a tighter title page and HUD */
+@media (max-height:520px){.panel{padding:14px 16px;border-radius:16px}.title-grid{gap:16px}h1{font-size:2.4rem}.lede{font-size:.9rem}#preview{display:none}.stack{gap:9px}.btn.big{font-size:1.1rem;padding:9px 20px}.threats canvas{width:58px;height:40px}.threats li{grid-template-columns:58px 1fr}.keys{font-size:.82rem}#dist{font-size:1.8rem}#boss{top:52px}#board{top:60px;font-size:.78rem;min-width:140px}#toasts{top:88px}}
 </style></head><body>
 <canvas id="c"></canvas>
 
@@ -122,7 +131,8 @@ input[type=text]{background:#160f38;border:2px solid var(--ink);border-radius:10
 </div>
 <div id="hint" hidden></div>
 <div id="toasts" aria-live="polite"></div>
-<div id="touch" hidden><div id="stick" hidden><b></b></div><div id="touch-tip">Left thumb: fly · Right thumb: aim and erase</div></div>
+<div id="touch" hidden><div id="stick" class="stick idle"><b></b><small>Fly</small></div><div id="stick2" class="stick idle"><b></b><small>Aim + erase</small></div></div>
+<div id="rotate" class="ov" hidden><div class="ph"></div><h2>Turn your phone sideways</h2><p class="lede">Eraser Ray Racers plays in landscape.</p></div>
 
 <div id="title" class="ov">
   <div class="panel">
@@ -145,7 +155,13 @@ input[type=text]{background:#160f38;border:2px solid var(--ink);border-radius:10
       </div>
       <div class="stack">
         <h3>How to fly</h3>
-        <div class="keys">
+        <div class="keys" id="keys-touch" hidden>
+          <span><kbd>Left thumb</kbd></span><span>Drag anywhere on the left half to fly</span>
+          <span><kbd>Right thumb</kbd></span><span>Hold on the right half to fire. Drag to aim. Let go before it overheats.</span>
+          <span><kbd>❚❚</kbd></span><span>Top-right button: pause or menu</span>
+          <span><kbd>Sideways</kbd></span><span>Hold your phone in landscape</span>
+        </div>
+        <div class="keys" id="keys-pc">
           <span><kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd></span><span>Fly</span>
           <span><kbd>Mouse</kbd></span><span>Aim the Eraser Ray cannon</span>
           <span><kbd>Click</kbd> / <kbd>Space</kbd></span><span>Hold to fire. Let go before it overheats.</span>
@@ -501,19 +517,44 @@ addEventListener('keydown',e=>{
 addEventListener('keyup',e=>{K[e.code]=false});
 addEventListener('blur',()=>{for(const k in K)K[k]=false;mouse.down=false;if(state==='play'&&!NET.active&&!paused)togglePause()});
 function toWorld(cx,cy){return{x:(cx-OX)/S,y:(cy-OY)/S}}
-cv.addEventListener('mousemove',e=>{const p=toWorld(e.clientX,e.clientY);mouse.x=p.x;mouse.y=p.y;mouse.seen=true});
+cv.addEventListener('mousemove',e=>{if(touchUI&&!IS_TOUCH&&(e.movementX||e.movementY))setTouchUI(false);const p=toWorld(e.clientX,e.clientY);mouse.x=p.x;mouse.y=p.y;mouse.seen=true});
 cv.addEventListener('mousedown',e=>{if(e.button===0){mouse.down=true;initAudio()}});
 addEventListener('mouseup',e=>{if(e.button===0)mouse.down=false});
 cv.addEventListener('contextmenu',e=>e.preventDefault());
-// touch: left half is a floating stick, right half aims and fires
+// Touch: twin sticks. Left half of the screen flies (a floating stick that appears under your thumb).
+// Right half fires while held, and dragging aims the cannon in that direction; the aim stays put when you let go.
+// Touch controls turn on by themselves the first time the screen is touched, so touchscreen laptops get them too.
 const IS_TOUCH=matchMedia('(hover: none) and (pointer: coarse)').matches;
-const TC={id:null,ox:0,oy:0,mx:0,my:0,fid:null,fire:false};
-cv.addEventListener('touchstart',e=>{initAudio();for(const t of e.changedTouches){if(t.clientX<VW/2&&TC.id===null){TC.id=t.identifier;TC.ox=t.clientX;TC.oy=t.clientY;TC.mx=0;TC.my=0;const s=$('stick');s.hidden=false;s.style.left=t.clientX+'px';s.style.top=t.clientY+'px'}
-  else if(TC.fid===null){TC.fid=t.identifier;TC.fire=true;const p=toWorld(t.clientX,t.clientY);mouse.x=p.x;mouse.y=p.y}}e.preventDefault()},{passive:false});
-cv.addEventListener('touchmove',e=>{for(const t of e.changedTouches){if(t.identifier===TC.id){const dx=t.clientX-TC.ox,dy=t.clientY-TC.oy,l=Math.hypot(dx,dy),m=Math.min(l,50);TC.mx=l?dx/l*m/50:0;TC.my=l?dy/l*m/50:0;
-  $('stick').firstElementChild.style.transform=`translate(${TC.mx*36}px,${TC.my*36}px)`}else if(t.identifier===TC.fid){const p=toWorld(t.clientX,t.clientY);mouse.x=p.x;mouse.y=p.y}}e.preventDefault()},{passive:false});
-function tend(e){for(const t of e.changedTouches){if(t.identifier===TC.id){TC.id=null;TC.mx=TC.my=0;$('stick').hidden=true;$('stick').firstElementChild.style.transform=''}if(t.identifier===TC.fid){TC.fid=null;TC.fire=false}}}
+let touchUI=IS_TOUCH;
+const TC={id:null,ox:0,oy:0,mx:0,my:0,aid:null,aox:0,aoy:0,fire:false,aim:-Math.PI/2};
+const STICK_R=52;
+function setTouchUI(on){if(touchUI===on)return;touchUI=on;$('touch').hidden=!(on&&state==='play');$('keys-touch').hidden=!on;$('keys-pc').hidden=on;checkRotate()}
+function restSticks(){const y=VH-Math.max(96,VH*.2);placeStick('stick',Math.max(92,VW*.1),y,0,0,true);placeStick('stick2',VW-Math.max(92,VW*.1),y,0,0,true)}
+function placeStick(id,x,y,kx,ky,idle){const s=$(id);s.style.left=x+'px';s.style.top=y+'px';s.classList.toggle('idle',!!idle);s.firstElementChild.style.transform=`translate(${kx}px,${ky}px)`}
+cv.addEventListener('touchstart',e=>{e.preventDefault();initAudio();setTouchUI(true);if(state!=='play')return;
+  for(const t of e.changedTouches){
+    if(t.clientX<VW/2){if(TC.id!==null)continue;TC.id=t.identifier;TC.ox=t.clientX;TC.oy=t.clientY;TC.mx=TC.my=0;placeStick('stick',t.clientX,t.clientY,0,0,false)}
+    else{if(TC.aid!==null)continue;TC.aid=t.identifier;TC.aox=t.clientX;TC.aoy=t.clientY;TC.fire=true;
+      placeStick('stick2',t.clientX,t.clientY,Math.cos(TC.aim)*STICK_R*.7,Math.sin(TC.aim)*STICK_R*.7,false)}}},{passive:false});
+cv.addEventListener('touchmove',e=>{e.preventDefault();for(const t of e.changedTouches){
+  if(t.identifier===TC.id){const dx=t.clientX-TC.ox,dy=t.clientY-TC.oy,l=Math.hypot(dx,dy),m=Math.min(l,STICK_R);TC.mx=l?dx/l*m/STICK_R:0;TC.my=l?dy/l*m/STICK_R:0;
+    // a stick dragged far past its ring follows the thumb, so it never runs out of room
+    if(l>STICK_R*1.6){TC.ox=t.clientX-dx/l*STICK_R*1.6;TC.oy=t.clientY-dy/l*STICK_R*1.6}
+    placeStick('stick',TC.ox,TC.oy,TC.mx*STICK_R*.7,TC.my*STICK_R*.7,false)}
+  else if(t.identifier===TC.aid){const dx=t.clientX-TC.aox,dy=t.clientY-TC.aoy,l=Math.hypot(dx,dy);if(l>10)TC.aim=Math.atan2(dy,dx);
+    if(l>STICK_R*1.6){TC.aox=t.clientX-dx/l*STICK_R*1.6;TC.aoy=t.clientY-dy/l*STICK_R*1.6}
+    placeStick('stick2',TC.aox,TC.aoy,Math.cos(TC.aim)*STICK_R*.7,Math.sin(TC.aim)*STICK_R*.7,false)}}},{passive:false});
+function tend(e){for(const t of e.changedTouches){if(t.identifier===TC.id){TC.id=null;TC.mx=TC.my=0}if(t.identifier===TC.aid){TC.aid=null;TC.fire=false}}
+  if(TC.id===null&&TC.aid===null)restSticks();else{if(TC.id===null)placeStick('stick',Math.max(92,VW*.1),VH-Math.max(96,VH*.2),0,0,true);if(TC.aid===null)placeStick('stick2',VW-Math.max(92,VW*.1),VH-Math.max(96,VH*.2),0,0,true)}}
 cv.addEventListener('touchend',tend);cv.addEventListener('touchcancel',tend);
+function resetTouch(){TC.id=TC.aid=null;TC.mx=TC.my=0;TC.fire=false;TC.aim=-Math.PI/2;restSticks()}
+// phones play sideways: a portrait phone gets a "turn it" screen (and solo play waits)
+let rotWait=false;
+function checkRotate(){const need=touchUI&&state==='play'&&VH>VW*1.05,rb=$('rotate');if(rb.hidden===need)rb.hidden=!need;
+  if(need&&!rotWait&&!NET.active&&!paused){rotWait=true;paused=true;beamSound(false,false,false)}else if(!need&&rotWait){rotWait=false;if($('pause').hidden)paused=false}}
+function goFull(){if(!touchUI)return;const d=document.documentElement;try{const p=d.requestFullscreen?d.requestFullscreen({navigationUI:'hide'}):d.webkitRequestFullscreen?d.webkitRequestFullscreen():null;
+  Promise.resolve(p).then(()=>screen.orientation&&screen.orientation.lock&&screen.orientation.lock('landscape')).catch(()=>{})}catch(e){}}
+const buzz=ms=>{if(touchUI&&navigator.vibrate)try{navigator.vibrate(ms)}catch(e){}};
 
 // ===================================================================== world simulation (solo, or the host's page)
 const auth=()=>!NET.active||NET.host;
@@ -688,8 +729,8 @@ function dealDamage(e,dmg){if(auth())hurtEnt(e,dmg,NET.active?NET.me:'me');else 
 let lastHurtSfx=0;
 // steady damage (the Mothership ray) ignores the short invulnerability after a hit
 function hurtMe(dmg,steady){const p=me;if(!p||!p.alive||(!steady&&p.inv>0))return;p.hp-=dmg;
-  if(!steady)p.inv=.45;hurtFlash=Math.max(hurtFlash,steady?.7:1);shake=Math.max(shake,steady?4:8);if(T-lastHurtSfx>(steady?.3:0)){lastHurtSfx=T;sfx.hurt()}if(p.hp<=0)die()}
-function die(){const p=me;p.hp=0;p.alive=false;p.beam=false;p.d=world.dist;boom(p.x,p.y,60);crumbs(p.x,p.y,24,30);sfx.death();shake=18;
+  if(!steady){p.inv=.45;buzz(40)}hurtFlash=Math.max(hurtFlash,steady?.7:1);shake=Math.max(shake,steady?4:8);if(T-lastHurtSfx>(steady?.3:0)){lastHurtSfx=T;sfx.hurt()}if(p.hp<=0)die()}
+function die(){const p=me;p.hp=0;buzz(250);p.alive=false;p.beam=false;p.d=world.dist;boom(p.x,p.y,60);crumbs(p.x,p.y,24,30);sfx.death();shake=18;
   if(world.dist>best){best=world.dist;try{localStorage.setItem('err-best',Math.floor(best))}catch(e){}}
   if(!NET.active)overTimer=1.6}
 const UP_NAME={dbl:'Double Cannon',mega:'Mega Ray',pierce:'Ray Pierce'};
@@ -705,7 +746,7 @@ function updShip(dt){const p=me;if(!p)return;p.inv-=dt;
   let ix=(K.KeyD||K.ArrowRight?1:0)-(K.KeyA||K.ArrowLeft?1:0)+TC.mx,iy=(K.KeyS||K.ArrowDown?1:0)-(K.KeyW||K.ArrowUp?1:0)+TC.my;const il=Math.hypot(ix,iy);if(il>1){ix/=il;iy/=il}
   const SPD=410;p.vx+=(ix*SPD-p.vx)*Math.min(1,dt*9);p.vy+=(iy*SPD-p.vy)*Math.min(1,dt*9);
   p.x=clamp(p.x+p.vx*dt,50,W-50);p.y=clamp(p.y+p.vy*dt,60,H-45);p.thr=clamp(-p.vy/SPD,0,1);
-  p.aim=Math.atan2(mouse.y-(p.y+cannonPivot()),mouse.x-p.x);
+  p.aim=touchUI?TC.aim:Math.atan2(mouse.y-(p.y+cannonPivot()),mouse.x-p.x);
   const want=(mouse.down||K.Space||TC.fire)&&!p.over;
   p.beam=want;
   if(want){p.heat+=HEAT_UP*dt;if(p.heat>=1){p.heat=1;p.over=true;p.beam=false;toast('Eraser ray overheated!','#ff9f4a')}}
@@ -724,7 +765,7 @@ function updShip(dt){const p=me;if(!p)return;p.inv-=dt;
   if(T-(p.cdClean||0)>5){p.cdClean=T;for(const id in p.cd)if(p.cd[id]<T)delete p.cd[id]}}
 
 // ===================================================================== main step
-function step(dt){T+=dt;
+function step(dt){T+=dt;checkRotate();
   scrollMul=state==='play'?.6+world.spd/SPD0*.45:.5;updStars(dt);
   if(NET.active&&!paused)netTick(dt);
   if(state==='title'){titleSim(dt);return}
@@ -799,8 +840,11 @@ function drawWorld(){
     ctx.font='17px "Luckiest Guy",Impact,sans-serif';ctx.textAlign='center';ctx.lineWidth=4;ctx.strokeStyle=INK;ctx.strokeText(r.nk,r.x,r.y-36);ctx.fillStyle=NAMEC[r.ci];ctx.fillText(r.nk,r.x,r.y-36)}
   if(me&&me.alive&&state==='play'&&!(me.inv>0&&((T*14|0)%2)))drawShip(ctx,me.x,me.y,T,me.aim,{beam:me.beam,thr:me.thr,dbl:me.dbl,mega:me.mega});
   drawFx(1);
-  if(me&&me.alive&&state==='play'&&mouse.seen&&!IS_TOUCH){ctx.beginPath();ctx.arc(mouse.x,mouse.y,10,0,TAU);ctx.moveTo(mouse.x-16,mouse.y);ctx.lineTo(mouse.x-6,mouse.y);ctx.moveTo(mouse.x+6,mouse.y);ctx.lineTo(mouse.x+16,mouse.y);
-    ctx.lineWidth=5;ctx.strokeStyle=INK;ctx.stroke();ctx.lineWidth=2.2;ctx.strokeStyle=me.over?'#ff9f4a':'#ff8fc0';ctx.stroke()}}
+  if(me&&me.alive&&state==='play'&&mouse.seen&&!touchUI){ctx.beginPath();ctx.arc(mouse.x,mouse.y,10,0,TAU);ctx.moveTo(mouse.x-16,mouse.y);ctx.lineTo(mouse.x-6,mouse.y);ctx.moveTo(mouse.x+6,mouse.y);ctx.lineTo(mouse.x+16,mouse.y);
+    ctx.lineWidth=5;ctx.strokeStyle=INK;ctx.stroke();ctx.lineWidth=2.2;ctx.strokeStyle=me.over?'#ff9f4a':'#ff8fc0';ctx.stroke()}
+  // on touch there is no cursor, so show a short dotted aim guide while not firing
+  if(me&&me.alive&&state==='play'&&touchUI&&!me.beam)for(const o of beamOrigins(me)){ctx.setLineDash([3,12]);ctx.lineCap='round';ctx.beginPath();ctx.moveTo(o.x,o.y);ctx.lineTo(o.x+Math.cos(me.aim)*170,o.y+Math.sin(me.aim)*170);
+    ctx.lineWidth=6;ctx.strokeStyle=INK;ctx.stroke();ctx.lineWidth=3;ctx.strokeStyle=me.over?'#ff9f4a':'#ff8fc0';ctx.stroke();ctx.setLineDash([])}}
 
 // ===================================================================== HUD + screens
 let hudSig='',boardT=0,updSig='';
@@ -823,9 +867,9 @@ function updBoard(){const b=$('board'),rows=boardRows(),sig=JSON.stringify(rows.
   const t=$('room-tag');t.hidden=false;t.textContent=`Room ${NET.code.toUpperCase()} · ${rows.length} pilot${rows.length===1?'':'s'}`}
 function toast(msg,c){const t=document.createElement('div');t.className='toast';t.textContent=msg;if(c)t.style.color=c;const box=$('toasts');box.append(t);while(box.children.length>4)box.firstChild.remove();setTimeout(()=>t.remove(),2600)}
 let hintT=null;
-function showHint(){const h=$('hint');h.textContent=IS_TOUCH?'Left thumb flies. Right thumb aims and erases.':'Fly with W A S D. Aim with the mouse. Hold click or Space to fire the Eraser Ray.';h.hidden=false;h.style.opacity=1;
+function showHint(){const h=$('hint');h.textContent=touchUI?'Left thumb flies. Hold the right side to erase, and drag to aim.':'Fly with W A S D. Aim with the mouse. Hold click or Space to fire the Eraser Ray.';h.hidden=false;h.style.opacity=1;
   clearTimeout(hintT);hintT=setTimeout(()=>{h.style.opacity=0;hintT=setTimeout(()=>h.hidden=true,700)},7000)}
-function enterPlay(){state='play';paused=false;for(const id of['title','mp','pause','over'])$(id).hidden=true;$('hud').hidden=false;$('touch').hidden=!IS_TOUCH;hudSig='';showHint();initAudio()}
+function enterPlay(){state='play';paused=false;for(const id of['title','mp','pause','over'])$(id).hidden=true;$('hud').hidden=false;$('touch').hidden=!touchUI;resetTouch();hudSig='';showHint();initAudio()}
 function resetWorld(){ents=[];bullets=[];fx=[];NID=1;Object.assign(SP,{deb:1.2,en:6,mk:22,mo:2000,cat:4});overTimer=0;me=newShip();if(NET.mirrors)NET.mirrors=new Map()}
 function startSolo(){resetWorld();world={st:1,run:1,dist:0,spd:SPD0,np:1};$('board').hidden=true;$('room-tag').hidden=true;enterPlay()}
 function showOverSolo(){state='over';$('hud').hidden=true;$('touch').hidden=true;beamSound(false,false,false);
@@ -850,8 +894,8 @@ const SEEN_OF={rock:'deb',scrap:'deb',sat:'deb',dart:'raid',gun:'raid',dread:'ra
 let seen=new Set();try{seen=new Set(JSON.parse(localStorage.getItem('err-seen')||'[]'))}catch(e){}
 function markSeen(k){const s=SEEN_OF[k];if(!s||seen.has(s))return;seen.add(s);try{localStorage.setItem('err-seen',JSON.stringify([...seen]))}catch(e){}}
 function updSeen(){let any=false;for(const li of document.querySelectorAll('#threats li[data-seen]')){const on=seen.has(li.dataset.seen);li.hidden=!on;if(on)any=true}$('seen-none').hidden=any}
-$('play-solo').onclick=()=>{initAudio();startSolo()};
-$('play-mp').onclick=()=>{initAudio();openMP()};
+$('play-solo').onclick=()=>{initAudio();goFull();startSolo()};
+$('play-mp').onclick=()=>{initAudio();goFull();openMP()};
 $('menu-btn').onclick=()=>togglePause();
 $('resume').onclick=()=>togglePause();
 $('quit').onclick=()=>{if(NET.active)endRoom();else toTitle()};
@@ -1019,7 +1063,7 @@ $('install-btn').onclick=async()=>{if(!deferredInstall)return;deferredInstall.pr
 if(onWeb&&'serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
 
 // ===================================================================== loop
-addEventListener('resize',resize);resize();spawnPlanet(false);updBest();updSeen();
+addEventListener('resize',()=>{resize();restSticks()});$('keys-touch').hidden=!touchUI;$('keys-pc').hidden=touchUI;restSticks();resize();spawnPlanet(false);updBest();updSeen();
 let last=performance.now();
 function frame(now){const dt=Math.min(.05,(now-last)/1000);last=now;step(dt);render();if(!$('title').hidden)drawPreview();requestAnimationFrame(frame)}
 requestAnimationFrame(frame);

@@ -35,10 +35,18 @@ The title screen lists only the enemies and pickups you have run into so far. It
 | W A S D / arrow keys | Fly |
 | Mouse | Aim the Eraser Ray |
 | Click / Space | Hold to fire. Let go before it overheats. |
-| Esc | Pause (solo) or menu (multiplayer) |
+| Esc or the ❚❚ button | Pause (solo) or menu (multiplayer) |
 | M | Sound on or off |
 
-On a touchscreen, your left thumb flies and your right thumb aims and fires.
+### Phones and tablets
+
+Hold your phone sideways. If it is held upright, the game asks you to turn it, and solo play waits until you do. Pressing **Fly solo** or **Play together** on a phone also switches to full screen where the browser allows it.
+
+- **Left thumb:** touch anywhere on the left half and drag to fly. The stick appears under your thumb.
+- **Right thumb:** touch and hold anywhere on the right half to fire the Eraser Ray. Drag to aim; the aim stays where you left it when you let go. A dotted line shows where you are aiming.
+- **❚❚** in the top-right corner pauses (solo) or opens the menu (multiplayer).
+
+Phones that support it buzz when you get hit. Touch controls also switch on by themselves the first time you touch the screen of a touchscreen laptop.
 
 ## Playing together
 
